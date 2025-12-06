@@ -1,0 +1,95 @@
+(function(Scratch) {
+'use strict';
+
+class MultiplayerExtension {
+getInfo() {
+return {
+id: 'simplemultiplayer', // A unique ID for your extension
+name: 'Simple Multiplayer',
+color1: '#4a90e2', // Main color for the blocks
+blocks: [
+{
+opcode: 'connect',
+text: 'connect to server: [SERVER_URL]',
+blockType: Scratch.BlockType.COMMAND,
+arguments: {
+SERVER_URL: {
+type: Scratch.ArgumentType.STRING,
+defaultValue: 'ws://your-server-url.com'
+}
+}
+},
+{
+opcode: 'sendMessage',
+text: 'send message: [MESSAGE]',
+blockType: Scratch.BlockType.COMMAND,
+arguments: {
+MESSAGE: {
+type: Scratch.ArgumentType.STRING,
+defaultValue: 'Hello everyone!'
+}
+}
+},
+{
+opcode: 'onMessageReceived',
+text: 'when message received',
+blockType: Scratch.BlockType.HAT // Hat blocks trigger when an event happens
+},
+{
+opcode: 'latestMessage',
+text: 'latest message',
+blockType: Scratch.BlockType.REPORTER, // Reporter blocks return a value
+disableMonitor: true
+}
+]
+};
+}
+
+// Instance variables to store connection and messages
+websocket = null;
+latestMsg = '';
+
+connect(args) {
+const url = args.SERVER_URL;
+this.websocket = new WebSocket(url); //
+
+this.websocket.onopen = () => {
+console.log('Connected to multiplayer server');
+};
+
+this.websocket.onmessage = (event) => {
+this.latestMsg = event.data;
+// The hat block will be triggered in the VM's main loop
+};
+
+this.websocket.onclose = () => {
+console.log('Disconnected from multiplayer server');
+};
+
+this.websocket.onerror = (error) => {
+console.error('WebSocket error:', error);
+};
+}
+
+sendMessage(args) {
+if (this.websocket && this.websocket.readyState === WebSocket.OPEN) {
+this.websocket.send(args.MESSAGE);
+} else {
+console.error('WebSocket is not connected.');
+}
+}
+
+// This method is used by the 'when message received' hat block
+onMessageReceived() {
+// The VM handles the logic of checking if this condition is true
+// You might need a more complex way to trigger hat blocks only once per message
+return this.latestMsg !== ''; // Simple check, usually more complex logic is needed
+}
+
+latestMessage() {
+return this.latestMsg;
+}
+}
+
+Scratch.extensions.register(new MultiplayerExtension());
+})(Scratch);
