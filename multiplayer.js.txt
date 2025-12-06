@@ -4,8 +4,8 @@
 class MultiplayerExtension {
 getInfo() {
 return {
-id: 'simplemultiplayer', // A unique ID for your extension
-name: 'Simple Multiplayer',
+id: 'multiplayer', // A unique ID for your extension
+name: 'Multiplayer',
 color1: '#4a90e2', // Main color for the blocks
 blocks: [
 {
@@ -93,3 +93,4 @@ return this.latestMsg;
 
 Scratch.extensions.register(new MultiplayerExtension());
 })(Scratch);
+
